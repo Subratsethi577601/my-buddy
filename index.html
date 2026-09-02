@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0f172a">
-<title>My Buddy V8</title>
+<title>My Buddy V9</title>
 <style>
 :root{--bg:#f6f7fb;--card:#fff;--text:#0f172a;--muted:#64748b;--line:#e2e8f0;--accent:#2563eb;--soft:#eff6ff;--danger:#dc2626;--good:#16a34a}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
@@ -55,7 +55,7 @@ function addInvestment(preselected=""){
 </head>
 <body>
 <div class="app">
-<header class="header"><div class="brand"><h1>🤖 My Buddy</h1><span>V8 • Navigation Fixed</span></div><p>Your AI personal finance & life assistant</p></header>
+<header class="header"><div class="brand"><h1>🤖 My Buddy</h1><span>V9 • Money Fixed</span></div><p>Your AI personal finance & life assistant</p></header>
 <main id="main"></main>
 <nav class="nav">
 <button data-tab="home">🏠 Home</button><button data-tab="money">💰 Money</button><button data-tab="loans">🏦 Loans</button><button data-tab="invest">📈 Invest</button><button data-tab="tasks">📋 Tasks</button>
@@ -290,5 +290,13 @@ render();
 })();
 </script>
 
+
+<script>
+function exportMyBuddyData(){
+  const data={expenses:state.expenses||[],incomes:state.incomes||[],investments:state.investments||[],loans:state.loans||[],tasks:state.tasks||[]};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="my-buddy-backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+</script>
 </body>
 </html>
