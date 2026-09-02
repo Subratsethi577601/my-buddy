@@ -1,1 +1,6 @@
-My Buddy V7 – Fixed add/edit/delete for spending, income and investments. Category selection works in both Spending and Investment sections. Complete PWA package included. Data remains in browser localStorage.
+My Buddy V8 – Navigation Fixed
+- Restores working Home, Money, Loans, Invest, Tasks and Report tabs.
+- Money tab includes spending/income entry, categories and edit/delete.
+- Investment tab includes categories and edit/delete.
+- Complete PWA package.
+- Existing localStorage data is preserved by the app; do not clear Chrome site data.
