@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0f172a">
+<title>My Buddy V8</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--text:#0f172a;--muted:#64748b;--line:#e2e8f0;--accent:#2563eb;--soft:#eff6ff;--danger:#dc2626;--good:#16a34a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+.app{max-width:1100px;margin:auto;min-height:100vh}.header{background:#0f172a;color:#fff;padding:20px 18px 18px;position:sticky;top:0;z-index:4}.brand{display:flex;align-items:center;justify-content:space-between}.brand h1{margin:0;font-size:27px}.brand span{font-size:12px;color:#cbd5e1}.header p{margin:7px 0 0;color:#cbd5e1}
+main{padding:18px 16px 88px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:15px;box-shadow:0 2px 8px #0f172a08}.label{font-size:12px;color:var(--muted)}.num{font-size:21px;font-weight:800;margin-top:4px}.section{margin-top:20px}.section h2{font-size:18px;margin:0 0 10px}.chat{background:#fff;border:1px solid var(--line);border-radius:17px;padding:12px;min-height:130px;max-height:360px;overflow:auto}.msg{padding:10px 12px;border-radius:14px;margin:7px 0;line-height:1.4;max-width:92%;font-size:14px}.buddy{background:#eef2ff}.user{background:#dbeafe;margin-left:auto}.inputrow{display:flex;gap:8px;margin-top:9px}.inputrow input{flex:1;padding:13px;border:1px solid #cbd5e1;border-radius:13px;font-size:15px}.btn{border:0;border-radius:12px;background:var(--accent);color:#fff;padding:11px 14px;font-weight:700;cursor:pointer}.btn.secondary{background:#e2e8f0;color:#0f172a}.btn.danger{background:#fee2e2;color:#991b1b}.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}.sourcecard{background:#f8fafc;border:1px solid #e2e8f0;border-radius:15px;padding:13px}.sourcecard b{display:block;margin-bottom:4px}.switch{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #e5e7eb}.switch input{width:20px;height:20px}.attachbtn{width:48px;height:48px;border:0;border-radius:50%;background:#e2e8f0;color:#0f172a;font-size:20px;cursor:pointer}.voicebtn{width:48px;height:48px;border:0;border-radius:50%;background:#0f172a;color:#fff;font-size:20px;cursor:pointer}.voicebtn.listening{background:#dc2626;animation:pulse 1s infinite}@keyframes pulse{50%{transform:scale(1.08);opacity:.8}}.chip{border:1px solid #bfdbfe;background:#eff6ff;border-radius:99px;padding:8px 10px;color:#1d4ed8;cursor:pointer}
+.list{display:grid;gap:8px}.item{background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px;display:flex;justify-content:space-between;gap:10px;align-items:center}.small{font-size:12px;color:var(--muted)}.progress{height:8px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin-top:8px}.progress>i{display:block;height:100%;background:var(--accent)}.badge{font-size:11px;padding:5px 8px;border-radius:99px;background:#eef2ff;color:#3730a3}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:center;gap:3px;padding:8px;z-index:6}.nav button{border:0;background:#fff;padding:9px 12px;border-radius:11px;font-size:13px}.nav button.active{background:#0f172a;color:#fff}
+.modal{display:none;position:fixed;inset:0;background:#0008;align-items:flex-end;justify-content:center;z-index:20}.modal.open{display:flex}.sheet{background:#fff;width:min(600px,100%);padding:20px;border-radius:20px 20px 0 0}.sheet input,.sheet select{width:100%;padding:12px;margin:6px 0 11px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px}.twocol{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.notice{padding:12px;border-radius:14px;background:#fffbeb;border:1px solid #fde68a}.good{background:#f0fdf4;border-color:#bbf7d0}.dangerbox{background:#fef2f2;border-color:#fecaca}
+.empty{color:var(--muted);padding:12px 0}.editBtns{display:flex;gap:5px;align-items:center;flex-wrap:wrap}.mini{padding:6px 8px;border:0;border-radius:8px;background:#e2e8f0;cursor:pointer}.donut{width:170px;height:170px;border-radius:50%;position:relative;flex:none}.donut:after{content:"";position:absolute;inset:40px;background:#fff;border-radius:50%}.chartrow{display:grid;grid-template-columns:90px 1fr 85px;gap:8px;align-items:center;margin:8px 0;font-size:13px}.chartbar{height:10px;background:#e2e8f0;border-radius:99px;overflow:hidden}.chartbar i{display:block;height:100%;background:#2563eb}.legend{display:grid;gap:8px}.legendrow{display:flex;align-items:center;gap:7px}.dot{width:11px;height:11px;border-radius:3px}
+@media(min-width:760px){.grid4{grid-template-columns:repeat(4,1fr)}.grid{grid-template-columns:repeat(3,1fr)}.nav{position:sticky;bottom:0}.modal{align-items:center}.sheet{border-radius:20px}}
+</style>
+<link rel="manifest" href="./manifest.webmanifest"><meta name="mobile-web-app-capable" content="yes"><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script>const EXPENSE_CATS=["Food", "Grocery", "Vegetable", "Non-Veg", "Petrol/Fuel", "Travel", "Home Products", "Car Maintenance", "Bike Maintenance", "House Maintenance", "Medical", "Electricity/Bills", "Mobile/Internet", "Shopping", "EMI/Loan", "Insurance", "Education", "Family", "Entertainment", "Donation/Temple", "Other"];
+const INVESTMENT_CATS=["Sukanya Samriddhi", "PPF", "VPF", "SIP", "Mutual Fund", "LIC", "Gold", "Stock", "FD", "Bond", "NPS", "Other"];
+function addExpense(preselected=""){
+  let cats=EXPENSE_CATS;
+  openModal("Add Expense",`<input id="en" placeholder="Expense description">
+  <select id="ec">${cats.map(c=>`<option ${c===preselected?"selected":""}>${c}</option>`).join("")}</select>
+  <input id="ea" type="number" placeholder="Amount ₹">
+  <input id="ed" type="date" value="${new Date().toISOString().slice(0,10)}">`,
+  ()=>{let n=$("en").value,a=+$("ea").value,d=$("ed").value;
+    if(n&&a)state.expenses.push({name:n,category:$("ec").value,amount:a,date:d||new Date().toISOString()})
+  })
+}
+function addInvestment(preselected=""){
+  let cats=INVESTMENT_CATS;
+  openModal("Add Investment",`<input id="in" placeholder="Investment name">
+  <select id="it">${cats.map(c=>`<option ${c===preselected?"selected":""}>${c}</option>`).join("")}</select>
+  <div class="twocol"><input id="ia" type="number" placeholder="Invested ₹"><input id="ic" type="number" placeholder="Current value ₹"></div>
+  <input id="idate" type="date" value="${new Date().toISOString().slice(0,10)}">`,
+  ()=>{let n=$("in").value,a=+$("ia").value,c=+$("ic").value||a,d=$("idate").value;
+    if(n&&a)state.investments.push({name:n,type:$("it").value,amount:a,current:c,date:d||new Date().toISOString()})
+  })
+}
+
+</script>
+
+<style>
+#report .card{margin-bottom:14px}
+#reportSummary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:12px 0}
+.reportStat{padding:16px;border-radius:16px;background:var(--card,#fff);border:1px solid rgba(0,0,0,.08)}
+.reportStat .label{font-size:12px;opacity:.65}.reportStat .value{font-size:22px;font-weight:800;margin-top:5px}
+.historyRow{display:grid;grid-template-columns:1.2fr repeat(4,1fr);gap:8px;padding:11px 6px;border-bottom:1px solid rgba(0,0,0,.08);align-items:center}
+.historyRow.header{font-weight:700;opacity:.7;font-size:12px}
+.categoryLine{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(0,0,0,.06)}
+</style>
+
+</head>
+<body>
+<div class="app">
+<header class="header"><div class="brand"><h1>🤖 My Buddy</h1><span>V8 • Navigation Fixed</span></div><p>Your AI personal finance & life assistant</p></header>
+<main id="main"></main>
+<nav class="nav">
+<button data-tab="home">🏠 Home</button><button data-tab="money">💰 Money</button><button data-tab="loans">🏦 Loans</button><button data-tab="invest">📈 Invest</button><button data-tab="tasks">📋 Tasks</button>
+<button data-tab="report">📊 Report</button></nav></div>
+<div id="modal" class="modal"><div class="sheet"><h2 id="mtitle"></h2><div id="mbody"></div><div class="inputrow"><button class="btn" onclick="saveModal()">Save</button><button class="btn secondary" onclick="closeModal()">Cancel</button></div></div></div>
+<script>
+const KEY="myBuddyV2";let state=JSON.parse(localStorage.getItem(KEY)||"null")||{income:0,incomes:[],expenses:[],tasks:[],goals:[],loans:[],investments:[],chat:[]};let tab="home",action=null;if(Array.isArray(state.incomes))state.income=state.incomes.reduce((s,x)=>s+Number(x.amount||0),0);
+const $=id=>document.getElementById(id), save=()=>localStorage.setItem(KEY,JSON.stringify(state));
+const inr=n=>new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(n||0);
+function expTotal(){return state.expenses.reduce((s,x)=>s+x.amount,0)}function invTotal(){return state.investments.reduce((s,x)=>s+x.amount,0)}
+function setTab(t){tab=t;document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.tab===t));render()}
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+function render(){let m=$("main");m.innerHTML=tab==="home"?home():tab==="money"?money():tab==="loans"?loans():tab==="invest"?invest():tab==="report"?reportScreen():tasks();if(tab==="report")setTimeout(renderMonthEndReport,0)}
+function home(){let available=state.income-expTotal();let pending=state.tasks.filter(t=>!t.done).length;
+return `<section><h2>Hi 👋</h2><p class="small">Talk naturally. Buddy will turn simple messages into financial records and tasks.</p>
+<div class="grid4"><div class="card"><div class="label">Income</div><div class="num">${inr(state.income)}</div></div><div class="card"><div class="label">Spent</div><div class="num">${inr(expTotal())}</div></div><div class="card"><div class="label">Available</div><div class="num">${inr(Math.max(0,available))}</div></div><div class="card"><div class="label">Invested</div><div class="num">${inr(invTotal())}</div></div></div></section>
+<section class="section"><h2>💬 Ask My Buddy</h2><div class="chat" id="chat">${state.chat.map(x=>`<div class="msg ${x.who}">${x.text}</div>`).join("")||`<div class="msg buddy">Hello! I can record expenses/income, create tasks, answer spending questions and analyse loans. Try “spent ₹850 on groceries”.</div>`}</div>
+<div class="inputrow"><button id="voiceBtn" class="voicebtn" onclick="toggleVoice()" title="Talk to Buddy">🎙️</button><button class="attachbtn" onclick="document.getElementById('fileInput').click()" title="Attach document">📎</button><input id="ask" placeholder="e.g. read my September statement"><button class="btn" onclick="ask()">Send</button></div><input id="fileInput" type="file" accept="image/*,.pdf,.csv,.xlsx,.xls" style="display:none" onchange="handleFile(this.files[0])"><div id="fileStatus" class="small" style="margin-top:6px">Attach receipt, bank statement, investment PDF or Excel/CSV.</div>
+<div class="section sourcecard"><b>🔐 Data sources</b><span class="small">My Buddy is designed to use the smallest access needed.</span>
+<div class="switch"><span>📎 Selected documents</span><span class="badge">Available</span></div>
+<div class="switch"><span>📧 Email / Gmail</span><button class="btn secondary" onclick="showEmailInfo()">Connect later</button></div>
+<div class="switch"><span>📱 Financial SMS</span><button class="btn secondary" onclick="showSmsInfo()">Android only</button></div>
+<div class="switch"><span>🎙️ Voice</span><span class="badge">Available</span></div></div><div id="voiceStatus" class="small" style="margin-top:7px">Tap 🎙️ and speak naturally. Voice uses your browser's speech recognition when supported.</div>
+${attachmentInstructions()}<div class="chips"><button class="chip" onclick="quick('How much did I spend?')">Monthly spending</button><button class="chip" onclick="quick('How much can I save?')">Savings</button><button class="chip" onclick="quick('Show my pending tasks')">Pending tasks</button><button class="chip" onclick="quick('Analyse my loans')">Loan analysis</button></div></section>
+<section class="section"><h2>🧠 Buddy insight</h2>${insight()}</section>
+<section class="section"><h2>🎯 Goals</h2>${goalHtml()}</section></section>`}
+
+function reportScreen(){return `<section><div class="card"><h2>📊 Month End Report</h2><p class="small">Choose a month to review income, spending, investments, balance and expense categories.</p><select id="reportMonth" onchange="renderMonthEndReport()"></select></div><div id="reportSummary" class="grid"></div><div class="card"><h3>🥧 Spending by expense category</h3><div style="max-width:520px;margin:auto"><canvas id="expensePie"></canvas></div><div id="expenseCategoryList"></div></div><div class="card"><h3>📊 Monthly money flow</h3><div style="max-width:720px;margin:auto"><canvas id="moneyBar"></canvas></div></div><div class="card"><h3>📅 Monthly history</h3><div id="monthlyHistory"></div></div><div class="card"><h3>🤖 Buddy's month-end notes</h3><div id="reportNotes" class="muted">Add transactions to generate observations.</div></div></section>`}
+
+function insight(){if(!state.income&&!state.expenses.length)return `<div class="notice">Add a few transactions and Buddy will start finding spending patterns.</div>`;let ratio=state.income?expTotal()/state.income:0;if(ratio>.7)return `<div class="notice dangerbox">Your recorded expenses are ${Math.round(ratio*100)}% of recorded income. Consider reviewing discretionary spending before adding new commitments.</div>`;return `<div class="notice good">Your recorded expenses are ${Math.round(ratio*100)}% of recorded income. Keep an eye on upcoming EMIs and recurring bills before deciding your extra savings.</div>`}
+function goalHtml(){return state.goals.length?`<div class="list">${state.goals.map(g=>{let p=Math.min(100,Math.round(g.saved/g.target*100));return `<div class="card"><b>${g.name}</b><div class="small">${inr(g.saved)} of ${inr(g.target)}</div><div class="progress"><i style="width:${p}%"></i></div><div class="small">${p}% complete</div></div>`}).join("")}</div>`:`<div class="empty">No savings goals yet. <button class="btn secondary" onclick="addGoal()">Add goal</button></div>`}
+function money(){let cats={};state.expenses.forEach(x=>cats[x.category||"Other"]=(cats[x.category||"Other"]||0)+Number(x.amount||0));return `<section><h2>💰 Money</h2><div class="grid"><div class="card"><div class="label">Income</div><div class="num">${inr(state.income)}</div></div><div class="card"><div class="label">Expenses</div><div class="num">${inr(expTotal())}</div></div><div class="card"><div class="label">Net recorded</div><div class="num">${inr(state.income-expTotal())}</div></div></div><div class="chips"><button class="btn" onclick="addExpense()">+ Expense</button><button class="btn" onclick="addIncome()">+ Income</button></div><section class="section"><h3>🏷️ Expense categories</h3><div class="chips">${EXPENSE_CATS.map(c=>`<button class="chip" onclick='addExpense(${JSON.stringify(c)})'>${c}</button>`).join("")}</div></section><section class="section"><h2>Income entries</h2><div class="list">${(state.incomes||[]).map((x,i)=>`<div class="item"><span><b>${inr(x.amount)}</b><br><span class="small">${x.note||"Income"} · ${new Date(x.date).toLocaleDateString("en-IN")}</span></span><span><button class="mini" onclick="editIncome(${i})">Edit</button> <button class="mini" onclick="deleteIncome(${i})">Delete</button></span></div>`).join("")||`<div class="empty">No income entries yet.</div>`}</div></section><section class="section"><h2>Recent transactions</h2><div class="list">${state.expenses.slice().reverse().slice(0,20).map(x=>{let i=state.expenses.indexOf(x);return `<div class="item"><span><b>${x.category||"Other"}</b><br><span class="small">${x.note||x.name||"Expense"} · ${new Date(x.date).toLocaleDateString("en-IN")}</span></span><span><b>${inr(x.amount)}</b><br><button class="mini" onclick="editExpense(${i})">Edit</button> <button class="mini" onclick="deleteExpense(${i})">Delete</button></span></div>`}).join("")||`<div class="empty">Nothing recorded.</div>`}</div></section><section class="section"><h2>📊 Income / Spending / Investment / Balance</h2>${moneyChart()}</section></section>`}
+function loans(){return `<section><h2>🏦 Loans & EMI Advisor</h2><button class="btn" onclick="addLoan()">+ Add Loan</button><p class="small">This prototype uses standard reducing-balance EMI mathematics. Actual lender prepayment rules/fees must be checked before acting.</p><section class="section">${state.loans.length?state.loans.map(loanCard).join(""):`<div class="empty">Add your loan amount, rate and tenure to compare EMI options.</div>`}</section></section>`}
+function calc(P,annual,years,emiOverride=0){let r=annual/1200,n=years*12,emi=emiOverride||P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);let bal=P,mo=0,interest=0;while(bal>0.01&&mo<n+240){let int=bal*r,pay=Math.min(emi,bal+int);bal=bal+int-pay;interest+=int;mo++;if(emi<=0)break}return {emi,mo,interest}}
+function loanCard(l){let base=calc(l.principal,l.rate,l.term);let top=base.emi+l.topup;let alt=calc(l.principal,l.rate,l.term,top);let saved=Math.max(0,base.interest-alt.interest);return `<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between"><b>${l.name}</b><span class="badge">${l.rate}% reducing</span></div><p class="small">Principal ${inr(l.principal)} · Tenure ${l.term} years</p><div class="grid4"><div><span class="label">Base EMI</span><br><b>${inr(base.emi)}</b></div><div><span class="label">Base interest*</span><br><b>${inr(base.interest)}</b></div><div><span class="label">Top-up EMI</span><br><b>${inr(top)}</b></div><div><span class="label">New months*</span><br><b>${alt.mo}</b></div></div><div class="notice good" style="margin-top:10px">💡 Buddy estimate: adding <b>${inr(l.topup)}</b>/month may save about <b>${inr(saved)}</b> interest and finish about <b>${Math.max(0,base.mo-alt.mo)} months</b> earlier.</div><p class="small">*Estimate assumes the rate stays constant and extra payment is applied as modeled; lender rules can change the actual result.</p><button class="btn danger" onclick="removeLoan('${l.id}')">Remove</button></div>`}
+function invest(){let cats=INVESTMENT_CATS;let by={};state.investments.forEach(x=>{let k=x.type||"Other";by[k]=(by[k]||0)+Number(x.amount||0)});return `<section><h2>📈 Investments</h2><div class="grid"><div class="card"><div class="label">Total invested</div><div class="num">${inr(invTotal())}</div></div><div class="card"><div class="label">Current value</div><div class="num">${inr(state.investments.reduce((s,x)=>s+Number(x.current||0),0))}</div></div></div><section class="section"><h3>📁 Investment categories</h3><div class="chips">${cats.map(c=>`<button class="chip" onclick='addInvestment(${JSON.stringify(c)})'>${c}</button>`).join("")}</div><p class="small">Tap a category to add an investment with that category selected.</p></section><button class="btn" onclick="addInvestment()">+ Investment</button><section class="section"><div class="list">${state.investments.map((x,i)=>`<div class="item"><span><b>${x.name}</b><br><span class="small">${x.type||"Other"}${x.date?" · "+new Date(x.date).toLocaleDateString("en-IN"):""}</span></span><span><b>${inr(x.current)}</b><br><span class="small">Invested ${inr(x.amount)}</span><br><button class="mini" onclick="editInvestment(${i})">Edit</button> <button class="mini" onclick="deleteInvestment(${i})">Delete</button></span></div>`).join("")||`<div class="empty">No investments added.</div>`}</div></section></section>`}
+function tasks(){return `<section><h2>📋 Tasks & Pending Work</h2><button class="btn" onclick="addTask()">+ Add Task</button><section class="section"><div class="list">${state.tasks.map((t,i)=>`<div class="item"><span><b style="${t.done?'text-decoration:line-through':''}">${t.title}</b><br><span class="small">${t.due||"No due date"}</span></span><div><button class="btn secondary" onclick="toggleTask(${i})">${t.done?"Undo":"Done"}</button></div></div>`).join("")||`<div class="empty">No tasks.</div>`}</div></section></section>`}
+
+function showEmailInfo(){
+ openModal("📧 Email connection",`<div class="notice">In the Android production app, Buddy can use an explicit Gmail/Outlook connection to find selected financial emails such as bank alerts, card statements, SIP confirmations and EMI notices. It should never read unrelated mail without user consent.</div><p class="small">Recommended flow: connect → select financial categories → review matches → import only confirmed transactions.</p>`,null);
+}
+function showSmsInfo(){
+ openModal("📱 Financial SMS",`<div class="notice dangerbox">Android SMS access is restricted and Google Play policies apply. Buddy should request only the permissions/use cases that are allowed for the distributed app.</div><p class="small">Recommended design: process relevant transaction alerts where permitted, never silently read everything, and provide a clear on/off switch.</p>`,null);
+}
+
+function addExpense(preselected=""){openModal("Add Expense",`<input id="en" placeholder="Expense description"><select id="ec">${EXPENSE_CATS.map(c=>`<option ${c===preselected?"selected":""}>${c}</option>`).join("")}</select><input id="ea" type="number" placeholder="Amount ₹"><input id="ed" type="date" value="${new Date().toISOString().slice(0,10)}">`,()=>{let n=$("en").value,a=+$("ea").value,d=$("ed").value;if(n&&a)state.expenses.push({name:n,note:n,category:$("ec").value,amount:a,date:d||new Date().toISOString()})})}
+function addIncome(){openModal("Add Income",`<input id="inamt" type="number" placeholder="Amount ₹"><input id="innote" placeholder="Income source"><input id="indate" type="date" value="${new Date().toISOString().slice(0,10)}">`,()=>{let a=+$("inamt").value,n=$("innote").value,d=$("indate").value;if(a){state.incomes=state.incomes||[];state.incomes.push({amount:a,note:n,date:d||new Date().toISOString()});state.income=state.incomes.reduce((s,x)=>s+Number(x.amount||0),0)}})}
+function addInvestment(preselected=""){openModal("Add Investment",`<input id="in" placeholder="Investment name"><select id="it">${INVESTMENT_CATS.map(c=>`<option ${c===preselected?"selected":""}>${c}</option>`).join("")}</select><div class="twocol"><input id="ia" type="number" placeholder="Invested ₹"><input id="ic" type="number" placeholder="Current value ₹"></div><input id="idate" type="date" value="${new Date().toISOString().slice(0,10)}">`,()=>{let n=$("in").value,a=+$("ia").value,c=+$("ic").value||a,d=$("idate").value;if(n&&a)state.investments.push({name:n,type:$("it").value,amount:a,current:c,date:d||new Date().toISOString()})})}
+function editExpense(i){let x=state.expenses[i];if(!x)return;openModal("Edit Expense",`<input id="en" value="${String(x.name||x.note||"Expense").replace(/"/g,"&quot;")}"><select id="ec">${EXPENSE_CATS.map(c=>`<option ${c===(x.category||"Other")?"selected":""}>${c}</option>`).join("")}</select><input id="ea" type="number" value="${Number(x.amount||0)}"><input id="ed" type="date" value="${String(x.date||"").slice(0,10)}">`,()=>{x.name=$("en").value;x.note=x.name;x.category=$("ec").value;x.amount=+$("ea").value||0;x.date=$("ed").value||x.date})}
+function deleteExpense(i){if(state.expenses[i]&&confirm("Delete this expense entry?")){state.expenses.splice(i,1);save();render()}}
+function editIncome(i){let x=state.incomes[i];if(!x)return;openModal("Edit Income",`<input id="inamt" type="number" value="${Number(x.amount||0)}"><input id="innote" value="${String(x.note||"").replace(/"/g,"&quot;")}"><input id="indate" type="date" value="${String(x.date||"").slice(0,10)}">`,()=>{x.amount=+$("inamt").value||0;x.note=$("innote").value;x.date=$("indate").value||x.date;state.income=state.incomes.reduce((s,z)=>s+Number(z.amount||0),0)})}
+function deleteIncome(i){if(state.incomes[i]&&confirm("Delete this income entry?")){state.incomes.splice(i,1);state.income=state.incomes.reduce((s,x)=>s+Number(x.amount||0),0);save();render()}}
+function editInvestment(i){let x=state.investments[i];if(!x)return;openModal("Edit Investment",`<input id="in" value="${String(x.name||"").replace(/"/g,"&quot;")}"><select id="it">${INVESTMENT_CATS.map(c=>`<option ${c===(x.type||"Other")?"selected":""}>${c}</option>`).join("")}</select><div class="twocol"><input id="ia" type="number" value="${Number(x.amount||0)}"><input id="ic" type="number" value="${Number(x.current||0)}"></div><input id="idate" type="date" value="${String(x.date||"").slice(0,10)}">`,()=>{x.name=$("in").value;x.type=$("it").value;x.amount=+$("ia").value||0;x.current=+$("ic").value||0;x.date=$("idate").value||x.date})}
+function deleteInvestment(i){if(state.investments[i]&&confirm("Delete this investment entry?")){state.investments.splice(i,1);save();render()}}
+
+function openModal(title,body,fn){$("mtitle").textContent=title;$("mbody").innerHTML=body;action=fn;$("modal").classList.add("open")}function closeModal(){$("modal").classList.remove("open");action=null}function saveModal(){if(action)action();if(action)save();closeModal();render()}
+
+function attachmentPreview(kind,name){
+ if(kind==="image") return `📸 I received <b>${name}</b>. In the production AI version, I'll read the receipt/image and extract date, merchant, amount and category. For this browser prototype, I can prepare the document for processing but don't have a server-side OCR/AI parser connected yet.`;
+ if(kind==="PDF") return `📄 I received <b>${name}</b>. The production document reader will extract transactions/investments, identify the statement month and match them against your existing records. This prototype doesn't yet include a PDF parser.`;
+ if(kind==="spreadsheet") return `📊 I received <b>${name}</b>. The production reader will parse rows, identify amount/date/description columns and avoid duplicate transactions. This prototype doesn't yet include an Excel/CSV parser.`;
+ return `📎 I received <b>${name}</b>. The production reader can analyze supported financial documents.`;
+}
+function attachmentInstructions(){
+ return `<div class="notice"><b>📎 Document Assistant</b><br>Upload a receipt image, bank/credit-card statement PDF, investment statement PDF, CSV or Excel file. V3 prepares the workflow and shows how the document will be handled; real server-side OCR/PDF/XLSX extraction must be connected for automatic financial import.</div>`;
+}
+
+let recognition=null, listening=false;
+function voiceSupported(){return !!(window.SpeechRecognition||window.webkitSpeechRecognition)}
+function toggleVoice(){
+ const btn=document.getElementById("voiceBtn"), status=document.getElementById("voiceStatus");
+ if(!voiceSupported()){status.textContent="Voice input isn't supported in this browser. Try Chrome on Android."; return;}
+ if(listening){recognition.stop();return;}
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ recognition=new SR();
+ recognition.lang="en-IN";
+ recognition.continuous=false;
+ recognition.interimResults=true;
+ recognition.onstart=()=>{listening=true;btn.classList.add("listening");btn.textContent="⏹️";status.textContent="Listening… speak now."};
+ recognition.onresult=e=>{
+   let text="";
+   for(let i=e.resultIndex;i<e.results.length;i++) text+=e.results[i][0].transcript;
+   document.getElementById("ask").value=text;
+   status.textContent="Heard: "+text;
+   if(e.results[e.results.length-1].isFinal) setTimeout(()=>ask(),250);
+ };
+ recognition.onerror=e=>{status.textContent="Voice error: "+e.error+". You can type instead.";listening=false;btn.classList.remove("listening");btn.textContent="🎙️"};
+ recognition.onend=()=>{listening=false;btn.classList.remove("listening");btn.textContent="🎙️"};
+ recognition.start();
+}
+function speakBuddy(text){
+ if(!("speechSynthesis" in window)) return;
+ const plain=document.createElement("div");plain.innerHTML=text;
+ const u=new SpeechSynthesisUtterance(plain.textContent);
+ u.lang="en-IN"; u.rate=.95; u.pitch=1;
+ speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+
+document.querySelectorAll(".nav button[data-tab]").forEach(b=>b.addEventListener("click",()=>{tab=b.dataset.tab;render();window.scrollTo(0,0)}));
+render();
+</script>
+<script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));</script>
+<section id="report" class="section" style="display:none">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <div>
+        <h2>📊 Month End Report</h2>
+        <div class="muted">Review spending, income, investments and balance for any month.</div>
+      </div>
+      <select id="reportMonth" onchange="renderMonthEndReport()"></select>
+    </div>
+  </div>
+
+  <div id="reportSummary" class="grid"></div>
+
+  <div class="card">
+    <h3>Expense categories</h3>
+    <div style="max-width:520px;margin:auto"><canvas id="expensePie"></canvas></div>
+    <div id="expenseCategoryList"></div>
+  </div>
+
+  <div class="card">
+    <h3>Monthly money flow</h3>
+    <div style="max-width:720px;margin:auto"><canvas id="moneyBar"></canvas></div>
+  </div>
+
+  <div class="card">
+    <h3>Monthly history</h3>
+    <div id="monthlyHistory"></div>
+  </div>
+
+  <div class="card">
+    <h3>Buddy's month-end notes</h3>
+    <div id="reportNotes" class="muted">Add transactions to generate useful observations.</div>
+  </div>
+</section>
+
+
+<script>
+(function(){
+  const MONEY_KEYS = {
+    expenses:['expenses','spending','transactions'],
+    income:['income','incomes','earnings'],
+    investments:['investments','investment']
+  };
+
+  function arr(keys){
+    for(const k of keys){
+      try{
+        const v=JSON.parse(localStorage.getItem(k)||'null');
+        if(Array.isArray(v)) return v;
+      }catch(e){}
+    }
+    return [];
+  }
+  function num(o, keys){
+    for(const k of keys){
+      const v=o?.[k];
+      if(v!==undefined && v!==null && v!=='') {
+        const n=Number(String(v).replace(/[^0-9.-]/g,''));
+        if(Number.isFinite(n)) return n;
+      }
+    }
+    return 0;
+  }
+  function dateOf(o){
+    const d=o?.date||o?.transactionDate||o?.createdAt||o?.datetime||o?.time;
+    const x=d?new Date(d):new Date();
+    return isNaN(x)?new Date():x;
+  }
+  function categoryOf(o){
+    return String(o?.category||o?.type||o?.expenseCategory||o?.name||'Other').trim()||'Other';
+  }
+  function money(n){ return '₹'+Math.round(n).toLocaleString('en-IN'); }
+  function monthKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')}
+  function monthLabel(k){
+    const [y,m]=k.split('-').map(Number);
+    return new Date(y,m-1,1).toLocaleString('en-IN',{month:'short',year:'numeric'});
+  }
+
+  function allMonths(){
+    const set=new Set();
+    [...arr(MONEY_KEYS.expenses),...arr(MONEY_KEYS.income),...arr(MONEY_KEYS.investments)].forEach(o=>set.add(monthKey(dateOf(o))));
+    const now=new Date(); set.add(monthKey(now));
+    return [...set].sort().reverse();
+  }
+
+  function reportData(k){
+    const filter=o=>monthKey(dateOf(o))===k;
+    const ex=arr(MONEY_KEYS.expenses).filter(filter);
+    const inc=arr(MONEY_KEYS.income).filter(filter);
+    const inv=arr(MONEY_KEYS.investments).filter(filter);
+    const expenses=ex.reduce((s,o)=>s+num(o,['amount','value','spent','cost']),0);
+    const income=inc.reduce((s,o)=>s+num(o,['amount','value','received']),0);
+    const investment=inv.reduce((s,o)=>s+num(o,['amount','value','invested']),0);
+    const cats={};
+    ex.forEach(o=>{const c=categoryOf(o);cats[c]=(cats[c]||0)+num(o,['amount','value','spent','cost'])});
+    return {expenses,income,investment,balance:income-expenses-investment,cats};
+  }
+
+  window.renderMonthEndReport=function(){
+    const sel=document.getElementById('reportMonth'); if(!sel)return;
+    const months=allMonths();
+    const previous=window.__reportMonth;
+    sel.innerHTML=months.map(k=>`<option value="${k}">${monthLabel(k)}</option>`).join('');
+    if(previous && months.includes(previous)) sel.value=previous;
+    window.__reportMonth=sel.value;
+    const k=sel.value, d=reportData(k);
+    const stat=(l,v)=>`<div class="reportStat"><div class="label">${l}</div><div class="value">${money(v)}</div></div>`;
+    document.getElementById('reportSummary').innerHTML=stat('Income',d.income)+stat('Spending',d.expenses)+stat('Investments',d.investment)+stat('Balance',d.balance);
+    const list=Object.entries(d.cats).sort((a,b)=>b[1]-a[1]);
+    document.getElementById('expenseCategoryList').innerHTML=list.length?list.map(([c,v])=>`<div class="categoryLine"><span>${c}</span><strong>${money(v)}</strong></div>`).join(''):'<div class="muted">No expense entries for this month.</div>';
+    const notes=[];
+    if(d.income||d.expenses||d.investment){
+      if(d.income)notes.push(`Income recorded: ${money(d.income)}.`);
+      if(d.expenses)notes.push(`Spending recorded: ${money(d.expenses)}.`);
+      if(d.investment)notes.push(`Investments recorded: ${money(d.investment)}.`);
+      notes.push(d.balance>=0?`Balance after spending and investments: ${money(d.balance)}.`:`Outflow exceeded income by ${money(Math.abs(d.balance))}.`);
+      if(list[0])notes.push(`Largest expense category: ${list[0][0]} (${money(list[0][1])}).`);
+    } else notes.push('No money activity recorded for this month.');
+    document.getElementById('reportNotes').innerHTML=notes.map(x=>`<div style="padding:5px 0">• ${x}</div>`).join('');
+    if(window.__expensePie)window.__expensePie.destroy();
+    if(window.__moneyBar)window.__moneyBar.destroy();
+    if(window.Chart){
+      window.__expensePie=new Chart(document.getElementById('expensePie'),{type:'pie',data:{labels:list.map(x=>x[0]),datasets:[{data:list.map(x=>x[1])}]},options:{responsive:true,plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>c.label+': '+money(c.raw)}}}}});
+      window.__moneyBar=new Chart(document.getElementById('moneyBar'),{type:'bar',data:{labels:['Income','Spending','Investments','Balance'],datasets:[{label:'Amount',data:[d.income,d.expenses,d.investment,d.balance]}]},options:{responsive:true,scales:{y:{beginAtZero:true,ticks:{callback:v=>money(v)}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>money(c.raw)}}}}});
+    }
+    const history=allMonths().sort().reverse();
+    document.getElementById('monthlyHistory').innerHTML='<div class="historyRow header"><div>Month</div><div>Income</div><div>Spending</div><div>Invest</div><div>Balance</div></div>'+history.map(m=>{const x=reportData(m);return `<div class="historyRow"><div><strong>${monthLabel(m)}</strong></div><div>${money(x.income)}</div><div>${money(x.expenses)}</div><div>${money(x.investment)}</div><div>${money(x.balance)}</div></div>`}).join('');
+  };
+  },150));
+})();
+</script>
+
+</body>
+</html>
