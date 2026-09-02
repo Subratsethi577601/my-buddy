@@ -17,7 +17,30 @@ main{padding:18px 16px 88px}.grid{display:grid;grid-template-columns:repeat(2,1f
 .empty{color:var(--muted);padding:12px 0}.editBtns{display:flex;gap:5px;align-items:center;flex-wrap:wrap}.mini{padding:6px 8px;border:0;border-radius:8px;background:#e2e8f0;cursor:pointer}.donut{width:170px;height:170px;border-radius:50%;position:relative;flex:none}.donut:after{content:"";position:absolute;inset:40px;background:#fff;border-radius:50%}.chartrow{display:grid;grid-template-columns:90px 1fr 85px;gap:8px;align-items:center;margin:8px 0;font-size:13px}.chartbar{height:10px;background:#e2e8f0;border-radius:99px;overflow:hidden}.chartbar i{display:block;height:100%;background:#2563eb}.legend{display:grid;gap:8px}.legendrow{display:flex;align-items:center;gap:7px}.dot{width:11px;height:11px;border-radius:3px}
 @media(min-width:760px){.grid4{grid-template-columns:repeat(4,1fr)}.grid{grid-template-columns:repeat(3,1fr)}.nav{position:sticky;bottom:0}.modal{align-items:center}.sheet{border-radius:20px}}
 </style>
-<link rel="manifest" href="./manifest.webmanifest"><meta name="mobile-web-app-capable" content="yes"><script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="manifest" href="./manifest.webmanifest"><meta name="mobile-web-app-capable" content="yes"><script src="https://cdn.jsdelivr.net/npm/chart.js">const EXPENSE_CATS=["Food", "Grocery", "Vegetable", "Non-Veg", "Petrol/Fuel", "Travel", "Home Products", "Car Maintenance", "Bike Maintenance", "House Maintenance", "Medical", "Electricity/Bills", "Mobile/Internet", "Shopping", "EMI/Loan", "Insurance", "Education", "Family", "Entertainment", "Donation/Temple", "Other"];
+const INVESTMENT_CATS=["Sukanya Samriddhi", "PPF", "VPF", "SIP", "Mutual Fund", "LIC", "Gold", "Stock", "FD", "Bond", "NPS", "Other"];
+function addExpense(preselected=""){
+  let cats=EXPENSE_CATS;
+  openModal("Add Expense",`<input id="en" placeholder="Expense description">
+  <select id="ec">${cats.map(c=>`<option ${c===preselected?"selected":""}>${c}</option>`).join("")}</select>
+  <input id="ea" type="number" placeholder="Amount ₹">
+  <input id="ed" type="date" value="${new Date().toISOString().slice(0,10)}">`,
+  ()=>{let n=$("en").value,a=+$("ea").value,d=$("ed").value;
+    if(n&&a)state.expenses.push({name:n,category:$("ec").value,amount:a,date:d||new Date().toISOString()})
+  })
+}
+function addInvestment(preselected=""){
+  let cats=INVESTMENT_CATS;
+  openModal("Add Investment",`<input id="in" placeholder="Investment name">
+  <select id="it">${cats.map(c=>`<option ${c===preselected?"selected":""}>${c}</option>`).join("")}</select>
+  <div class="twocol"><input id="ia" type="number" placeholder="Invested ₹"><input id="ic" type="number" placeholder="Current value ₹"></div>
+  <input id="idate" type="date" value="${new Date().toISOString().slice(0,10)}">`,
+  ()=>{let n=$("in").value,a=+$("ia").value,c=+$("ic").value||a,d=$("idate").value;
+    if(n&&a)state.investments.push({name:n,type:$("it").value,amount:a,current:c,date:d||new Date().toISOString()})
+  })
+}
+
+</script>
 
 <style>
 #report .card{margin-bottom:14px}
@@ -32,11 +55,11 @@ main{padding:18px 16px 88px}.grid{display:grid;grid-template-columns:repeat(2,1f
 </head>
 <body>
 <div class="app">
-<header class="header"><div class="brand"><h1>🤖 My Buddy</h1><span>Final Prototype</span></div><p>Your AI personal finance & life assistant</p></header>
+<header class="header"><div class="brand"><h1>🤖 My Buddy</h1><span>V6 • Full Categories</span></div><p>Your AI personal finance & life assistant</p></header>
 <main id="main"></main>
 <nav class="nav">
 <button data-tab="home">🏠 Home</button><button data-tab="money">💰 Money</button><button data-tab="loans">🏦 Loans</button><button data-tab="invest">📈 Invest</button><button data-tab="tasks">📋 Tasks</button>
-<button onclick="showSection('report')">📊 Month End Report</button></nav></div>
+<button data-tab="report">📊 Report</button></nav></div>
 <div id="modal" class="modal"><div class="sheet"><h2 id="mtitle"></h2><div id="mbody"></div><div class="inputrow"><button class="btn" onclick="saveModal()">Save</button><button class="btn secondary" onclick="closeModal()">Cancel</button></div></div></div>
 <script>
 const KEY="myBuddyV2";let state=JSON.parse(localStorage.getItem(KEY)||"null")||{income:0,incomes:[],expenses:[],tasks:[],goals:[],loans:[],investments:[],chat:[]};let tab="home",action=null;
@@ -45,7 +68,7 @@ const inr=n=>new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maxi
 function expTotal(){return state.expenses.reduce((s,x)=>s+x.amount,0)}function invTotal(){return state.investments.reduce((s,x)=>s+x.amount,0)}
 function setTab(t){tab=t;document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.tab===t));render()}
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
-function render(){let m=$("main");m.innerHTML=tab==="home"?home():tab==="money"?money():tab==="loans"?loans():tab==="invest"?invest():tasks()}
+function render(){let m=$("main");m.innerHTML=tab==="home"?home():tab==="money"?money():tab==="loans"?loans():tab==="invest"?invest():tab==="report"?reportScreen():tasks();if(tab==="report")setTimeout(renderMonthEndReport,0)}
 function home(){let available=state.income-expTotal();let pending=state.tasks.filter(t=>!t.done).length;
 return `<section><h2>Hi 👋</h2><p class="small">Talk naturally. Buddy will turn simple messages into financial records and tasks.</p>
 <div class="grid4"><div class="card"><div class="label">Income</div><div class="num">${inr(state.income)}</div></div><div class="card"><div class="label">Spent</div><div class="num">${inr(expTotal())}</div></div><div class="card"><div class="label">Available</div><div class="num">${inr(Math.max(0,available))}</div></div><div class="card"><div class="label">Invested</div><div class="num">${inr(invTotal())}</div></div></div></section>
@@ -59,15 +82,18 @@ return `<section><h2>Hi 👋</h2><p class="small">Talk naturally. Buddy will tur
 ${attachmentInstructions()}<div class="chips"><button class="chip" onclick="quick('How much did I spend?')">Monthly spending</button><button class="chip" onclick="quick('How much can I save?')">Savings</button><button class="chip" onclick="quick('Show my pending tasks')">Pending tasks</button><button class="chip" onclick="quick('Analyse my loans')">Loan analysis</button></div></section>
 <section class="section"><h2>🧠 Buddy insight</h2>${insight()}</section>
 <section class="section"><h2>🎯 Goals</h2>${goalHtml()}</section></section>`}
+
+function reportScreen(){return `<section><div class="card"><h2>📊 Month End Report</h2><p class="small">Choose a month to review income, spending, investments, balance and expense categories.</p><select id="reportMonth" onchange="renderMonthEndReport()"></select></div><div id="reportSummary" class="grid"></div><div class="card"><h3>🥧 Spending by expense category</h3><div style="max-width:520px;margin:auto"><canvas id="expensePie"></canvas></div><div id="expenseCategoryList"></div></div><div class="card"><h3>📊 Monthly money flow</h3><div style="max-width:720px;margin:auto"><canvas id="moneyBar"></canvas></div></div><div class="card"><h3>📅 Monthly history</h3><div id="monthlyHistory"></div></div><div class="card"><h3>🤖 Buddy's month-end notes</h3><div id="reportNotes" class="muted">Add transactions to generate observations.</div></div></section>`}
+
 function insight(){if(!state.income&&!state.expenses.length)return `<div class="notice">Add a few transactions and Buddy will start finding spending patterns.</div>`;let ratio=state.income?expTotal()/state.income:0;if(ratio>.7)return `<div class="notice dangerbox">Your recorded expenses are ${Math.round(ratio*100)}% of recorded income. Consider reviewing discretionary spending before adding new commitments.</div>`;return `<div class="notice good">Your recorded expenses are ${Math.round(ratio*100)}% of recorded income. Keep an eye on upcoming EMIs and recurring bills before deciding your extra savings.</div>`}
 function goalHtml(){return state.goals.length?`<div class="list">${state.goals.map(g=>{let p=Math.min(100,Math.round(g.saved/g.target*100));return `<div class="card"><b>${g.name}</b><div class="small">${inr(g.saved)} of ${inr(g.target)}</div><div class="progress"><i style="width:${p}%"></i></div><div class="small">${p}% complete</div></div>`}).join("")}</div>`:`<div class="empty">No savings goals yet. <button class="btn secondary" onclick="addGoal()">Add goal</button></div>`}
 function money(){let cats={};state.expenses.forEach(x=>cats[x.category]=(cats[x.category]||0)+x.amount);return `<section><h2>💰 Money</h2><div class="grid"><div class="card"><div class="label">Income</div><div class="num">${inr(state.income)}</div></div><div class="card"><div class="label">Expenses</div><div class="num">${inr(expTotal())}</div></div><div class="card"><div class="label">Net recorded</div><div class="num">${inr(state.income-expTotal())}</div></div></div><div class="chips"><button class="btn" onclick="addExpense()">+ Expense</button><button class="btn" onclick="addIncome()">+ Income</button><button class="btn secondary" onclick="addGoal()">+ Savings Goal</button></div><section class="section"><h2>Income entries</h2><div class="list">${(state.incomes||[]).slice().reverse().map(x=>`<div class="item"><span><b>${inr(x.amount)}</b><br><span class="small">${x.note||"Income"} · ${new Date(x.date).toLocaleDateString("en-IN")}</span></span><div class="editBtns"><button class="mini" onclick="editIncome(${state.incomes.indexOf(x)})">Edit</button><button class="mini" onclick="deleteIncome(${state.incomes.indexOf(x)})">Delete</button></div></div>`).join("")||`<div class="empty">No income entries yet.</div>`}</div></section>
-<section class="section"><h2>Spending by category</h2>${Object.keys(cats).length?`<div class="list">${Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="item"><span>${k}</span><b>${inr(v)}</b></div>`).join("")}</div>`:`<div class="empty">No expenses yet.</div>`}</section>
+<section class="section"><h2>🏷️ Expense categories</h2><div class="chips"><button class="chip" onclick="addExpense("Food")">Food</button><button class="chip" onclick="addExpense("Grocery")">Grocery</button><button class="chip" onclick="addExpense("Vegetable")">Vegetable</button><button class="chip" onclick="addExpense("Non-Veg")">Non-Veg</button><button class="chip" onclick="addExpense("Petrol/Fuel")">Petrol/Fuel</button><button class="chip" onclick="addExpense("Travel")">Travel</button><button class="chip" onclick="addExpense("Home Products")">Home Products</button><button class="chip" onclick="addExpense("Car Maintenance")">Car Maintenance</button><button class="chip" onclick="addExpense("Bike Maintenance")">Bike Maintenance</button><button class="chip" onclick="addExpense("House Maintenance")">House Maintenance</button><button class="chip" onclick="addExpense("Medical")">Medical</button><button class="chip" onclick="addExpense("Electricity/Bills")">Electricity/Bills</button><button class="chip" onclick="addExpense("Mobile/Internet")">Mobile/Internet</button><button class="chip" onclick="addExpense("Shopping")">Shopping</button><button class="chip" onclick="addExpense("EMI/Loan")">EMI/Loan</button><button class="chip" onclick="addExpense("Insurance")">Insurance</button><button class="chip" onclick="addExpense("Education")">Education</button><button class="chip" onclick="addExpense("Family")">Family</button><button class="chip" onclick="addExpense("Entertainment")">Entertainment</button><button class="chip" onclick="addExpense("Donation/Temple")">Donation/Temple</button><button class="chip" onclick="addExpense("Other")">Other</button></div><p class="small">Tap a category to open the expense form with that category selected.</p></section><section class="section"><h2>Spending by category</h2>${Object.keys(cats).length?`<div class="list">${Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="item"><span>${k}</span><b>${inr(v)}</b></div>`).join("")}</div>`:`<div class="empty">No expenses yet.</div>`}</section>
 <section class="section"><h2>Recent transactions</h2><div class="list">${state.expenses.slice().reverse().slice(0,15).map((x,i)=>`<div class="item"><span><b>${x.category}</b><br><span class="small">${x.note||"Expense"} · ${new Date(x.date).toLocaleDateString("en-IN")}</span></span><div class="editBtns"><b>${inr(x.amount)}</b><button class="mini" onclick="editExpense(${state.expenses.indexOf(x)})">Edit</button><button class="mini" onclick="deleteExpense(${state.expenses.indexOf(x)})">Delete</button></div></div>`).join("")||`<div class="empty">Nothing recorded.</div>`}</div></section><section class="section"><h2>📊 Income / Spending / Investment / Balance</h2>${moneyChart()}</section></section>`}
 function loans(){return `<section><h2>🏦 Loans & EMI Advisor</h2><button class="btn" onclick="addLoan()">+ Add Loan</button><p class="small">This prototype uses standard reducing-balance EMI mathematics. Actual lender prepayment rules/fees must be checked before acting.</p><section class="section">${state.loans.length?state.loans.map(loanCard).join(""):`<div class="empty">Add your loan amount, rate and tenure to compare EMI options.</div>`}</section></section>`}
 function calc(P,annual,years,emiOverride=0){let r=annual/1200,n=years*12,emi=emiOverride||P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);let bal=P,mo=0,interest=0;while(bal>0.01&&mo<n+240){let int=bal*r,pay=Math.min(emi,bal+int);bal=bal+int-pay;interest+=int;mo++;if(emi<=0)break}return {emi,mo,interest}}
 function loanCard(l){let base=calc(l.principal,l.rate,l.term);let top=base.emi+l.topup;let alt=calc(l.principal,l.rate,l.term,top);let saved=Math.max(0,base.interest-alt.interest);return `<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between"><b>${l.name}</b><span class="badge">${l.rate}% reducing</span></div><p class="small">Principal ${inr(l.principal)} · Tenure ${l.term} years</p><div class="grid4"><div><span class="label">Base EMI</span><br><b>${inr(base.emi)}</b></div><div><span class="label">Base interest*</span><br><b>${inr(base.interest)}</b></div><div><span class="label">Top-up EMI</span><br><b>${inr(top)}</b></div><div><span class="label">New months*</span><br><b>${alt.mo}</b></div></div><div class="notice good" style="margin-top:10px">💡 Buddy estimate: adding <b>${inr(l.topup)}</b>/month may save about <b>${inr(saved)}</b> interest and finish about <b>${Math.max(0,base.mo-alt.mo)} months</b> earlier.</div><p class="small">*Estimate assumes the rate stays constant and extra payment is applied as modeled; lender rules can change the actual result.</p><button class="btn danger" onclick="removeLoan('${l.id}')">Remove</button></div>`}
-function invest(){return `<section><h2>📈 Investments</h2><div class="grid"><div class="card"><div class="label">Total invested</div><div class="num">${inr(invTotal())}</div></div><div class="card"><div class="label">Current value</div><div class="num">${inr(state.investments.reduce((s,x)=>s+x.current,0))}</div></div></div><div class="chips"><button class="btn" onclick="addInvestment()">+ Investment</button></div><section class="section"><div class="list">${state.investments.map(x=>`<div class="item"><span><b>${x.name}</b><br><span class="small">${x.type}</span></span><span><b>${inr(x.current)}</b><br><span class="small">Invested ${inr(x.amount)}</span><br><button class="mini" onclick="deleteInvestment(${i})">Delete</button></span></div>`).join("")||`<div class="empty">No investments added.</div>`}</div></section></section>`}
+function invest(){let cats=["Sukanya Samriddhi","PPF","VPF","SIP","Mutual Fund","LIC","Gold","Stock","FD","Bond","NPS","Other"];let by={};state.investments.forEach(x=>{let k=x.type||"Other";by[k]=(by[k]||0)+Number(x.amount||0)});return `<section><h2>📈 Investments</h2><div class="grid"><div class="card"><div class="label">Total invested</div><div class="num">${inr(invTotal())}</div></div><div class="card"><div class="label">Current value</div><div class="num">${inr(state.investments.reduce((s,x)=>s+Number(x.current||0),0))}</div></div></div><section class="section"><h3>Investment categories</h3><div class="chips investmentCats">${cats.map(c=>`<button class="chip" onclick="addInvestment('${c.replace(/'/g,"\\\\'")}')">${c}${by[c]?` · ${inr(by[c])}`:""}</button>`).join("")}</div><p class="small">Tap a category to add an investment. You can also choose the category inside the form.</p></section><div class="chips"><section class="section"><h3>📁 Investment categories</h3><div class="chips"><button class="chip" onclick="addInvestment("Sukanya Samriddhi")">Sukanya Samriddhi</button><button class="chip" onclick="addInvestment("PPF")">PPF</button><button class="chip" onclick="addInvestment("VPF")">VPF</button><button class="chip" onclick="addInvestment("SIP")">SIP</button><button class="chip" onclick="addInvestment("Mutual Fund")">Mutual Fund</button><button class="chip" onclick="addInvestment("LIC")">LIC</button><button class="chip" onclick="addInvestment("Gold")">Gold</button><button class="chip" onclick="addInvestment("Stock")">Stock</button><button class="chip" onclick="addInvestment("FD")">FD</button><button class="chip" onclick="addInvestment("Bond")">Bond</button><button class="chip" onclick="addInvestment("NPS")">NPS</button><button class="chip" onclick="addInvestment("Other")">Other</button></div></section><button class="btn" onclick="addInvestment()">+ Investment</button></div><section class="section"><div class="list">${state.investments.map((x,i)=>`<div class="item"><span><b>${x.name}</b><br><span class="small">${x.type||"Other"}${x.date?" · "+new Date(x.date).toLocaleDateString("en-IN"):""}</span></span><span><b>${inr(x.current)}</b><br><span class="small">Invested ${inr(x.amount)}</span><br><button class="mini" onclick="deleteInvestment(${i})">Delete</button></span></div>`).join("")||`<div class="empty">No investments added.</div>`}</div></section></section>`}
 function tasks(){return `<section><h2>📋 Tasks & Pending Work</h2><button class="btn" onclick="addTask()">+ Add Task</button><section class="section"><div class="list">${state.tasks.map((t,i)=>`<div class="item"><span><b style="${t.done?'text-decoration:line-through':''}">${t.title}</b><br><span class="small">${t.due||"No due date"}</span></span><div><button class="btn secondary" onclick="toggleTask(${i})">${t.done?"Undo":"Done"}</button></div></div>`).join("")||`<div class="empty">No tasks.</div>`}</div></section></section>`}
 
 function showEmailInfo(){
@@ -77,48 +103,7 @@ function showSmsInfo(){
  openModal("📱 Financial SMS",`<div class="notice dangerbox">Android SMS access is restricted and Google Play policies apply. Buddy should request only the permissions/use cases that are allowed for the distributed app.</div><p class="small">Recommended design: process relevant transaction alerts where permitted, never silently read everything, and provide a clear on/off switch.</p>`,null);
 }
 function openModal(title,body,fn){$("mtitle").textContent=title;$("mbody").innerHTML=body;action=fn;$("modal").classList.add("open")}function closeModal(){$("modal").classList.remove("open");action=null}function saveModal(){if(action)action();if(action)save();closeModal();render()}
-function addExpense(){openModal("Add Expense",`<input id="a" type="number" placeholder="Amount ₹"><input id="n" placeholder="Description"><select id="c"><option>Food</option><option>Groceries</option><option>Fuel</option><option>Home</option><option>Shopping</option><option>Travel</option><option>Family</option><option>EMI</option><option>Insurance</option><option>Other</option></select>`,()=>{let a=+$("a").value;if(a)state.expenses.push({amount:a,note:$("n").value,category:$("c").value,date:new Date().toISOString()})})}
-function addIncome(){openModal("Add Income",`<input id="a" type="number" placeholder="Amount ₹"><input id="n" placeholder="Source">`,()=>{let a=+$("a").value;if(a){if(!state.incomes)state.incomes=[];state.incomes.push({id:Date.now()+"",amount:a,note:$("n").value,date:new Date().toISOString()});state.income=incomeTotal()}})}
-function addGoal(){openModal("Savings Goal",`<input id="gn" placeholder="Goal name"><div class="twocol"><input id="gt" type="number" placeholder="Target ₹"><input id="gs" type="number" placeholder="Already saved ₹"></div>`,()=>{let n=$("gn").value,t=+$("gt").value,s=+$("gs").value||0;if(n&&t)state.goals.push({name:n,target:t,saved:s})})}
 
-function deleteExpense(i){if(confirm("Delete this expense?")){state.expenses.splice(i,1);save();render()}}
-function editExpense(i){let x=state.expenses[i];openModal("Edit Expense",`<input id="a" type="number" value="${x.amount}"><input id="n" value="${(x.note||"").replace(/"/g,"&quot;")}"><select id="c">${["Food","Groceries","Fuel","Home","Shopping","Travel","Family","EMI","Insurance","Other"].map(c=>`<option ${c===x.category?"selected":""}>${c}</option>`).join("")}</select>`,()=>{let a=+$("a").value;if(a){x.amount=a;x.note=$("n").value;x.category=$("c").value}})}
-function deleteIncome(i){if(confirm("Delete this income entry?")){state.incomes.splice(i,1);state.income=incomeTotal();save();render()}}
-function editIncome(i){let x=state.incomes[i];openModal("Edit Income",`<input id="a" type="number" value="${x.amount}"><input id="n" value="${(x.note||"").replace(/"/g,"&quot;")}">`,()=>{let a=+$("a").value;if(a){x.amount=a;x.note=$("n").value;state.income=incomeTotal()}})}
-function deleteInvestment(i){if(confirm("Delete this investment?")){state.investments.splice(i,1);save();render()}}
-function moneyChart(){let income=incomeTotal(),sp=expTotal(),inv=invTotal(),bal=Math.max(0,income-sp-inv),vals=[["Spending",sp,"#ef4444"],["Investment",inv,"#2563eb"],["Balance",bal,"#16a34a"]],sum=vals.reduce((a,x)=>a+x[1],0)||1,ang=0,parts=[];vals.forEach(x=>{let d=x[1]/sum*360;parts.push(x[2]+" "+ang+"deg "+(ang+d)+"deg");ang+=d});return `<div class="card"><div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap"><div class="donut" style="background:conic-gradient(${parts.join(",")})"></div><div class="legend">${vals.map(x=>`<div class="legendrow"><i class="dot" style="background:${x[2]}"></i><span>${x[0]}</span><b>${inr(x[1])}</b></div>`).join("")}</div></div><div class="section">${vals.map(x=>`<div class="chartrow"><span>${x[0]}</span><div class="chartbar"><i style="width:${income?Math.min(100,x[1]/income*100):0}%"></i></div><b>${inr(x[1])}</b></div>`).join("")}</div></div>`}
-
-function addTask(){openModal("New Task",`<input id="tt" placeholder="What needs to be done?"><input id="td" type="date">`,()=>{let t=$("tt").value;if(t)state.tasks.push({title:t,due:$("td").value,done:false})})}
-function addLoan(){openModal("Add Loan",`<input id="ln" placeholder="Loan name"><input id="lp" type="number" placeholder="Principal ₹"><input id="lr" type="number" step=".01" placeholder="Annual interest %"><input id="ly" type="number" placeholder="Tenure years"><input id="lt" type="number" placeholder="Suggested monthly top-up ₹ (e.g. 2000)">`,()=>{let n=$("ln").value,p=+$("lp").value,r=+$("lr").value,y=+$("ly").value,t=+$("lt").value||1000;if(n&&p&&r&&y)state.loans.push({id:Date.now()+"",name:n,principal:p,rate:r,term:y,topup:t})})}
-function addInvestment(){openModal("Add Investment",`<input id="in" placeholder="Investment name"><select id="it"><option>Sukanya Samriddhi</option><option>PPF</option><option>VPF</option><option>SIP</option><option>Mutual Fund</option><option>LIC</option><option>Gold</option><option>Stock</option><option>FD</option><option>Bond</option><option>NPS</option><option>Other</option></select><div class="twocol"><input id="ia" type="number" placeholder="Invested ₹"><input id="ic" type="number" placeholder="Current value ₹"></div>`,()=>{let n=$("in").value,a=+$("ia").value,c=+$("ic").value||a;if(n&&a)state.investments.push({name:n,type:$("it").value,amount:a,current:c})})}
-function toggleTask(i){state.tasks[i].done=!state.tasks[i].done;save();render()}function removeLoan(id){state.loans=state.loans.filter(x=>x.id!==id);save();render()}
-function quick(t){$("ask").value=t;ask()}
-function addChat(who,text){state.chat.push({who,text});if(state.chat.length>30)state.chat.shift();save();if(who==="buddy")setTimeout(()=>speakBuddy(text),50)}
-function ask(){let el=$("ask"),t=el.value.trim();if(!t)return;addChat("user",t);el.value="";let l=t.toLowerCase(),m=t.match(/₹?\s*([\d,]+(?:\.\d+)?)/);let reply="";
-if(/spent|paid|bought|purchase|expense/.test(l)&&m){let a=+m[1].replace(/,/g,""),cat=/petrol|fuel|diesel/.test(l)?"Fuel":/grocery|groceries|supermarket/.test(l)?"Groceries":/restaurant|food|swiggy|zomato/.test(l)?"Food":/shopping|amazon|flipkart/.test(l)?"Shopping":/electricity|rent|internet|home/.test(l)?"Home":"Other";state.expenses.push({amount:a,category:cat,note:t,date:new Date().toISOString()});reply=`✅ Recorded ${inr(a)} under <b>${cat}</b>.`; }
-else if(/salary|income|received|got paid/.test(l)&&m){let a=+m[1].replace(/,/g,"");state.income+=a;reply=`✅ Added ${inr(a)} to income. Recorded balance is approximately <b>${inr(state.income-expTotal())}</b>.`}
-else if(/how much.*spend|total.*spend|spent.*month/.test(l)){reply=`💰 Your recorded spending is <b>${inr(expTotal())}</b>.`;if(state.income)reply+=` That's ${Math.round(expTotal()/state.income*100)}% of recorded income.`}
-else if(/how much.*save|saving/.test(l)){reply=`💵 Recorded income: <b>${inr(state.income)}</b><br>Recorded expenses: <b>${inr(expTotal())}</b><br>Potential unspent amount: <b>${inr(Math.max(0,state.income-expTotal()))}</b>.`;}
-else if(/pending|task|todo|to-do/.test(l)){let p=state.tasks.filter(x=>!x.done);reply=p.length?`📋 You have <b>${p.length}</b> pending task(s):<br>${p.slice(0,5).map(x=>"• "+x.title).join("<br>")}`:`✅ No pending tasks.`}
-else if(/loan|emi|prepay|top.?up|interest/.test(l)){if(!state.loans.length)reply=`🏦 Add a loan under Loans first. Then I can compare your current EMI with an EMI plus monthly top-up.`;else {let best=state.loans[0];let b=calc(best.principal,best.rate,best.term),a=calc(best.principal,best.rate,best.term,b.emi+best.topup);reply=`🏦 <b>${best.name}</b>: base EMI ${inr(b.emi)}. With +${inr(best.topup)}/month, estimated closure becomes ${a.mo} months vs ${b.mo}, with about ${inr(Math.max(0,b.interest-a.interest))} estimated interest saving.`}}
-else if(/report|summary|month end/.test(l)){reply=`📊 <b>Current summary</b><br>Income: ${inr(state.income)}<br>Expenses: ${inr(expTotal())}<br>Invested: ${inr(invTotal())}<br>Pending tasks: ${state.tasks.filter(x=>!x.done).length}`;}
-else reply=`I can currently understand expenses, income, spending, savings, tasks, loans/EMI and basic investment questions. Try: <b>“spent ₹850 on groceries”</b> or <b>“how much did I spend?”</b>.`;
-addChat("buddy",reply);save();render()}
-
-
-let attachedDocument=null;
-function handleFile(file){
- if(!file)return;
- attachedDocument={name:file.name,type:file.type||"",size:file.size};
- const status=document.getElementById("fileStatus");
- status.textContent="📎 Attached: "+file.name+" — ready for analysis.";
- const lower=file.name.toLowerCase();
- let kind=/\.pdf$/.test(lower)?"PDF":/\.(xlsx|xls|csv)$/.test(lower)?"spreadsheet":/^image\//.test(file.type)?"image":"document";
- const msg="I attached a "+kind+" named "+file.name+".";
- addChat("user","📎 "+msg);
- addChat("buddy",attachmentPreview(kind,file.name));
- save(); if(!state.incomes)state.incomes=state.income?[{id:"legacy",amount:state.income,note:"Legacy income",date:new Date().toISOString()}]:[];save();render();
-}
 function attachmentPreview(kind,name){
  if(kind==="image") return `📸 I received <b>${name}</b>. In the production AI version, I'll read the receipt/image and extract date, merchant, amount and category. For this browser prototype, I can prepare the document for processing but don't have a server-side OCR/AI parser connected yet.`;
  if(kind==="PDF") return `📄 I received <b>${name}</b>. The production document reader will extract transactions/investments, identify the statement month and match them against your existing records. This prototype doesn't yet include a PDF parser.`;
@@ -264,61 +249,33 @@ render();
   window.renderMonthEndReport=function(){
     const sel=document.getElementById('reportMonth'); if(!sel)return;
     const months=allMonths();
+    const previous=window.__reportMonth;
     sel.innerHTML=months.map(k=>`<option value="${k}">${monthLabel(k)}</option>`).join('');
-    if(window.__reportMonth && months.includes(window.__reportMonth)) sel.value=window.__reportMonth;
+    if(previous && months.includes(previous)) sel.value=previous;
     window.__reportMonth=sel.value;
     const k=sel.value, d=reportData(k);
     const stat=(l,v)=>`<div class="reportStat"><div class="label">${l}</div><div class="value">${money(v)}</div></div>`;
-    document.getElementById('reportSummary').innerHTML=
-      stat('Income',d.income)+stat('Spending',d.expenses)+stat('Investments',d.investment)+stat('Balance',d.balance);
-
+    document.getElementById('reportSummary').innerHTML=stat('Income',d.income)+stat('Spending',d.expenses)+stat('Investments',d.investment)+stat('Balance',d.balance);
     const list=Object.entries(d.cats).sort((a,b)=>b[1]-a[1]);
-    document.getElementById('expenseCategoryList').innerHTML=list.length
-      ? list.map(([c,v])=>`<div class="categoryLine"><span>${c}</span><strong>${money(v)}</strong></div>`).join('')
-      : '<div class="muted">No expense entries for this month.</div>';
-
+    document.getElementById('expenseCategoryList').innerHTML=list.length?list.map(([c,v])=>`<div class="categoryLine"><span>${c}</span><strong>${money(v)}</strong></div>`).join(''):'<div class="muted">No expense entries for this month.</div>';
     const notes=[];
-    if(d.income===0 && d.expenses===0 && d.investment===0) notes.push('No money activity recorded for this month.');
-    else {
-      if(d.income>0) notes.push(`You received ${money(d.income)} this month.`);
-      if(d.expenses>0) notes.push(`Total spending was ${money(d.expenses)}.`);
-      if(d.investment>0) notes.push(`You invested ${money(d.investment)}.`);
-      notes.push(d.balance>=0 ? `Your recorded balance after spending and investments is ${money(d.balance)}.` : `Your recorded outflow exceeded income by ${money(Math.abs(d.balance))}.`);
-      if(list[0]) notes.push(`Largest expense category: ${list[0][0]} (${money(list[0][1])}).`);
-    }
+    if(d.income||d.expenses||d.investment){
+      if(d.income)notes.push(`Income recorded: ${money(d.income)}.`);
+      if(d.expenses)notes.push(`Spending recorded: ${money(d.expenses)}.`);
+      if(d.investment)notes.push(`Investments recorded: ${money(d.investment)}.`);
+      notes.push(d.balance>=0?`Balance after spending and investments: ${money(d.balance)}.`:`Outflow exceeded income by ${money(Math.abs(d.balance))}.`);
+      if(list[0])notes.push(`Largest expense category: ${list[0][0]} (${money(list[0][1])}).`);
+    } else notes.push('No money activity recorded for this month.');
     document.getElementById('reportNotes').innerHTML=notes.map(x=>`<div style="padding:5px 0">• ${x}</div>`).join('');
-
-    if(window.__expensePie) window.__expensePie.destroy();
-    if(window.__moneyBar) window.__moneyBar.destroy();
+    if(window.__expensePie)window.__expensePie.destroy();
+    if(window.__moneyBar)window.__moneyBar.destroy();
     if(window.Chart){
-      window.__expensePie=new Chart(document.getElementById('expensePie'),{
-        type:'pie',
-        data:{labels:list.map(x=>x[0]),datasets:[{data:list.map(x=>x[1])}]},
-        options:{responsive:true,plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>c.label+': '+money(c.raw)}}}}
-      });
-      window.__moneyBar=new Chart(document.getElementById('moneyBar'),{
-        type:'bar',
-        data:{labels:['Income','Spending','Investments','Balance'],datasets:[{label:'Amount',data:[d.income,d.expenses,d.investment,d.balance]}]},
-        options:{responsive:true,scales:{y:{beginAtZero:true,ticks:{callback:v=>money(v)}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>money(c.raw)}}}}
-      });
+      window.__expensePie=new Chart(document.getElementById('expensePie'),{type:'pie',data:{labels:list.map(x=>x[0]),datasets:[{data:list.map(x=>x[1])}]},options:{responsive:true,plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>c.label+': '+money(c.raw)}}}}});
+      window.__moneyBar=new Chart(document.getElementById('moneyBar'),{type:'bar',data:{labels:['Income','Spending','Investments','Balance'],datasets:[{label:'Amount',data:[d.income,d.expenses,d.investment,d.balance]}]},options:{responsive:true,scales:{y:{beginAtZero:true,ticks:{callback:v=>money(v)}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>money(c.raw)}}}}});
     }
-
     const history=allMonths().sort().reverse();
-    document.getElementById('monthlyHistory').innerHTML=
-      `<div class="historyRow header"><div>Month</div><div>Income</div><div>Spending</div><div>Invest</div><div>Balance</div></div>`+
-      history.map(m=>{
-        const x=reportData(m);
-        return `<div class="historyRow"><div><strong>${monthLabel(m)}</strong></div><div>${money(x.income)}</div><div>${money(x.expenses)}</div><div>${money(x.investment)}</div><div>${money(x.balance)}</div></div>`;
-      }).join('');
+    document.getElementById('monthlyHistory').innerHTML='<div class="historyRow header"><div>Month</div><div>Income</div><div>Spending</div><div>Invest</div><div>Balance</div></div>'+history.map(m=>{const x=reportData(m);return `<div class="historyRow"><div><strong>${monthLabel(m)}</strong></div><div>${money(x.income)}</div><div>${money(x.expenses)}</div><div>${money(x.investment)}</div><div>${money(x.balance)}</div></div>`}).join('');
   };
-
-  const oldShow=window.showSection;
-  window.showSection=function(id){
-    if(typeof oldShow==='function') oldShow(id);
-    if(id==='report') setTimeout(window.renderMonthEndReport,50);
-  };
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{
-    if(document.getElementById('reportMonth')) window.renderMonthEndReport();
   },150));
 })();
 </script>
