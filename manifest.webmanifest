@@ -1,7 +1,6 @@
 {
   "name": "My Buddy",
   "short_name": "My Buddy",
-  "description": "Your AI personal finance and life assistant",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
