@@ -1,15 +1,1 @@
-My Buddy V6 – Full Categories
-
-Upload all files in this folder to the root of your GitHub Pages repository.
-
-Spending categories:
-Food, Grocery, Vegetable, Non-Veg, Petrol/Fuel, Travel, Home Products,
-Car Maintenance, Bike Maintenance, House Maintenance, Medical,
-Electricity/Bills, Mobile/Internet, Shopping, EMI/Loan, Insurance,
-Education, Family, Entertainment, Donation/Temple, Other.
-
-Investment categories:
-Sukanya Samriddhi, PPF, VPF, SIP, Mutual Fund, LIC, Gold, Stock, FD,
-Bond, NPS, Other.
-
-Both sections save the selected category and date with each transaction.
+My Buddy V7 – Fixed add/edit/delete for spending, income and investments. Category selection works in both Spending and Investment sections. Complete PWA package included. Data remains in browser localStorage.
